@@ -1,4 +1,4 @@
-let obj2 = {
+let obj1 = {
   a: {
     b: {
       d: 0,
@@ -9,38 +9,55 @@ let obj2 = {
   },
   c: 9,
 };
+let obj2 = {
+  c: [
+    {
+      python: {
+        java: 3,
+      },
+    },
+    {
+      i: {
+        ok: 98,
+      },
+    },
+  ],
+  a: {
+    b: {
+      d: 0,
+    },
+  },
+  d: 9,
+};
 const get = (obj, path, defaultValue) => {
-  if (
-    obj === null ||
-    typeof obj !== "object" ||
-    Object.keys(obj).length === 0 ||
-    path === null ||
-    typeof path !== "string" ||
-    path === ""
-  ) {
+  if (!obj || typeof obj !== "object" || !path || typeof path !== "string") {
     return defaultValue;
   }
-  let index = 0;
+
   let keys = path.split(".");
-  let length = keys.length;
-  while (length !== 0) {
-    for (const [key, value] of Object.entries(obj)) {
-      var tempKey = key;
-      if (keys[index] === key) {
-        obj = value;
-        break;
-      }
-    }
-    if (tempKey !== keys[index]) {
+  let tempObj = null;
+
+  if (keys[0].includes("[")) {
+    tempObj = obj[keys[0][0]];
+    if (tempObj === undefined || !Array.isArray(tempObj)) {
       return defaultValue;
     }
-    index = index + 1;
-    length = length - 1;
-    if (length === 0) {
-      return obj;
+    tempObj = tempObj.splice(parseInt(keys[0].match(/\d+/g)[0]), 1)[0];
+  } else {
+    tempObj = obj[keys[0]];
+    if (tempObj === undefined) {
+      return defaultValue;
     }
   }
+
+  keys.splice(0, 1);
+
+  if (keys.length > 0) {
+    tempObj = get(tempObj, keys.join("."), defaultValue);
+  }
+
+  return tempObj;
 };
 
-let result = get(obj2, "b.name", "No Result");
-console.log("🚀 ~ file: lodash_get_func.js ~ line 58 ~ result", result);
+let result = get(obj2, "c[0].python.java", "No Result");
+console.log("🚀 ~ file: lodash_get_func.js ~ line 58 ~ result:", result);
